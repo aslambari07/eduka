@@ -30,7 +30,19 @@ composer install
 php artisan key:generate
 ```
 
-Create a MySQL database and user, then set `DB_*` in `.env`. For a local development database:
+Create the MySQL/XAMPP database and user, verify the actual XAMPP port, then set
+`DB_*` in `.env`. The intended local application database is `eduka_v1`; do
+not point it at the existing `eduka_rebuild` database when performing the
+migration. The current workspace keeps `.env` on the verified legacy database
+until XAMPP is started and `eduka_v1` is independently verified.
+
+For a new XAMPP target that must preserve the verified EDUKA data, use the
+non-destructive files in [`database/exports/README.md`](database/exports/README.md):
+import `create_eduka_v1.sql`, confirm the target is empty, then import
+`eduka_v1_full.sql` through phpMyAdmin. Do not run the import against an
+existing database and do not use an option that drops tables. For a genuinely
+empty development database where no existing data must be retained, migrations
+may be run after the target is verified:
 
 ```bash
 php artisan migrate --seed
@@ -39,6 +51,10 @@ npm install
 npm run build
 php artisan serve
 ```
+
+`database/database.sqlite` is retained as an ignored legacy artifact for
+compatibility checks, but it is not created by Composer, selected by Laravel's
+default connection, used by PHPUnit, or used by the local application path.
 
 The application will be available at `http://127.0.0.1:8000`. If the active CLI `php.ini` still has lower upload limits, start the local server with `php -d upload_max_filesize=8M -d post_max_size=10M artisan serve`. The account seeder creates clearly marked development accounts only when those email addresses are absent; it does not reset existing credentials:
 
@@ -52,15 +68,17 @@ These passwords are for local development only and must be changed or removed be
 
 For local development with automatic asset rebuilding, use `npm run dev` in a second terminal.
 
+The repository includes a local-only `server.php` wrapper for `php artisan serve`. It loads the application's `.env` before Laravel boots because Vercel CLI may create `.env.local` for its OIDC token; Laravel otherwise treats that file as the environment-specific override when `APP_ENV=local`.
+
 ## Tests and verification
 
 ```bash
-php artisan test
+vendor/bin/phpunit
 php artisan route:list
 npm run build
 ```
 
-The test suite uses the separate MySQL database configured in `phpunit.xml` (`eduka_rebuild_testing` by default). Do not point it at a production database. This workspace does not have the SQLite PDO extension, so tests intentionally use MySQL rather than silently falling back to SQLite.
+The test suite uses the separate MySQL database configured in `phpunit.xml` (`eduka_rebuild_testing` by default). Do not point it at a production database. This workspace does not have the SQLite PDO extension, so tests intentionally use MySQL rather than silently falling back to SQLite. Both `php artisan test --compact --no-ansi` and `vendor/bin/phpunit` are supported.
 
 ## Important environment settings
 

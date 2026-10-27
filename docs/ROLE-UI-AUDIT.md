@@ -97,7 +97,7 @@ Perbaikan Peserta: dashboard, profil, sertifikat index, dan catatan kini mengiku
 
 Hasil aktual final:
 
-- `php artisan test --compact` → **103 passed, 720 assertions**.
+- `vendor/bin/phpunit` → **103 passed, 720 assertions**. The current checkout does not register `php artisan test`.
 - `php artisan migrate:status --no-ansi` → seluruh **20 migration Ran**.
 - `php artisan route:list --no-ansi` → **69 routes**, tanpa nama route duplikat.
 - `php artisan view:cache` → **passed**.

@@ -19,7 +19,10 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    // EDUKA runs on MySQL/MariaDB locally, in tests, and in deployment.
+    // The SQLite connection remains defined only for framework compatibility;
+    // it is never selected when DB_CONNECTION is omitted.
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------

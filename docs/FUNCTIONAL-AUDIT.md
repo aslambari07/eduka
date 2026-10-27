@@ -10,7 +10,7 @@ Alur inti Admin, Pengajar, dan Peserta sudah diimplementasikan dan diuji secara 
 
 Hasil verifikasi terakhir:
 
-- `php artisan test --compact`: **103 passed, 720 assertions**.
+- `vendor/bin/phpunit`: **103 passed, 720 assertions**. The current checkout does not register `php artisan test`.
 - `php artisan view:cache`: **passed**.
 - `npm run build`: **passed** dengan Vite 7.3.7.
 - `php artisan migrate:status --no-ansi`: seluruh **20 migration Ran**.

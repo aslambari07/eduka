@@ -2,6 +2,31 @@
 
 Last verified: 2026-10-27, local workspace `/home/aslam/Desktop/EDUKA`.
 
+## MySQL/XAMPP migration status
+
+- The verified source remains MySQL `eduka_rebuild` on the system MySQL
+  instance at `127.0.0.1:3306` (MySQL 8.0.40). It contains 3 users, 4
+  categories, 6 courses, 24 lessons, 6 quizzes, 9 assignments, 7 assignment
+  submissions, 4 certificates, and all 20 migration records.
+- A non-empty source backup was created at
+  `/home/aslam/Desktop/eduka_rebuild_backup_20261027_2148.sql` before export
+  generation. The source database was not modified.
+- The target name is `eduka_v1`. It was not created on the system MySQL
+  instance, because the requested target is XAMPP. `/opt/lampp/lampp status`
+  reports XAMPP MySQL stopped; its bundled configuration lists port 3306,
+  which conflicts with the active system MySQL. The separate MariaDB listener
+  on port 3307 could not be authenticated and has not been treated as XAMPP.
+- SQL exports are in [`database/exports`](../database/exports/README.md).
+  They are generated from the verified source, contain no destructive drop or
+  truncate statements, and have not been imported into any target.
+- The active local `.env` still points to `eduka_rebuild` until an operator
+  starts/verifies XAMPP and confirms its actual port and credentials. No
+  application data was moved or overwritten in this session.
+- SQLite remains only as the untouched ignored `database/database.sqlite`
+  artifact. Laravel and queue fallbacks now default to MySQL, Composer no
+  longer creates the SQLite file, and PHPUnit continues to use the separate
+  MySQL test database.
+
 ## Foundation
 
 - Laravel 13 application scaffolded and running on PHP 8.3.14.
@@ -34,19 +59,21 @@ Last verified: 2026-10-27, local workspace `/home/aslam/Desktop/EDUKA`.
 Run:
 
 ```bash
-php artisan test
+vendor/bin/phpunit
 php artisan view:cache
 php artisan route:list
 npm run build
 ```
 
-Latest local results: `php artisan test --compact` passed **103 tests and 720 assertions**; `php artisan route:list --no-ansi` resolved **69 routes** with no duplicate named routes; `php artisan migrate:status --no-ansi` shows all 20 migrations ran; `php artisan view:cache` succeeded; and `npm run build` succeeded with Vite 7.3.7. HTTP smoke reached public pages, Admin, Pengajar, and Peserta entry points with status 200. PHP tests use MySQL because this environment does not expose the SQLite PDO extension. The test database is separate from the development database.
+Latest local results: `php artisan test --compact --no-ansi`, `composer test`, and `vendor/bin/phpunit` each passed **103 tests and 720 assertions**; `php artisan route:list --no-ansi` resolved **69 routes** with no duplicate named routes; `php artisan migrate:status --no-ansi` shows all 20 migrations ran; `php artisan view:cache` succeeded; and `npm run build` succeeded with Vite 7.3.7. HTTP smoke reached `/`, `/masuk`, `/kelas`, `/up`, and the generated CSS/JavaScript assets with status 200. PHP tests use MySQL because this environment does not expose the SQLite PDO extension. The test database is separate from the development database.
+
+One intermediate `php artisan test` invocation ran before Composer package-discovery cache was regenerated and logged a historical `Command "test" is not defined` entry. The tracked `bootstrap/cache` files were then regenerated through Composer, the command became available, and all subsequent test runs passed. The historical log entry was not deleted.
 
 ## Known limitations and follow-up
 
 - Chrome/CDP browser smoke is available and covered login/landing for all three roles plus a 390px Peserta overflow check. Homepage, catalog, and role dashboard screenshots were inspected locally; this is not a pixel-level comparison with Superdesign. The complete HTML/draft audit and local route/build checks are recorded in [SUPERDESIGN-UI-AUDIT.md](SUPERDESIGN-UI-AUDIT.md).
 - SMTP, HTTPS, server permissions, backups, and actual hosting deployment require environment-specific configuration and have not been claimed as live.
-- Vercel project `eduka-learning-portal` is created and linked to `aslambari07/eduka`; latest protected Preview `dpl_J1CS21m5RHPiT2dV2A5ytAf8aNgZ` is `READY`, with health and built asset checks returning `200`. The remote build command is `npm run build` on Node `22.x`. Authenticated `/` and `/masuk` still return `500` because TiDB application schema, rotated credential, CA certificate, and DB environment variables are absent; private object storage is also required before feature verification or Production promotion.
+- Vercel project `eduka-learning-portal` exists, but `vercel project inspect --json` currently reports `gitRepository: null` and `productionBranch: null`; repository/branch linkage still requires Dashboard confirmation. The latest local Preview for commit `533dc1b` (`dpl_ECpZR1DZnS6zaNaPev64h6qZkGq1`) is `READY` at `https://eduka-learning-portal-ntstmc3ty-aslambari07s-projects.vercel.app`. Authenticated CLI checks reached `/up` and read `/build/manifest.json`; authenticated `/`, `/kelas`, and `/masuk` return `500` because Preview has only `APP_DEBUG`, `APP_URL`, and `APP_KEY`, with no TiDB application schema, rotated credential, CA certificate, or DB environment variables. Private object storage is also required before feature verification or Production promotion. The Production domain still returns `404 DEPLOYMENT_NOT_FOUND`.
 - The current lesson content is plain text with escaped rendering; rich-text editing and video hosting are intentionally outside the implemented scope. PDF certificate generation is implemented with on-demand Dompdf rendering; separate persistent PDF storage and QR/signature assets are not.
 - Certificate output has an owner-authorized, on-demand server-generated PDF plus the existing HTML/print presentation fallback. The PDF is not persisted as a public file.
 - Queue workers are not required by the current synchronous workflows; add one only if future notifications or heavy processing need it.

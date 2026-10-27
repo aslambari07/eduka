@@ -2,15 +2,33 @@
 
 This application is prepared for a Laravel 13-compatible VPS or cPanel account and now includes a Vercel serverless entrypoint. A protected Vercel Preview has been built successfully, but Production has not been promoted because the TiDB application schema, rotated credential, and durable object storage are not yet configured.
 
+## Local XAMPP database migration
+
+The intended local target is MySQL/MariaDB database `eduka_v1`. The existing
+`eduka_rebuild` database on system MySQL 3306 is preserved and is not the target
+for this migration. Before changing the local `.env`, verify the XAMPP process,
+binary/datadir, host, port, authentication, and target schema. Do not assume a
+different MariaDB listener is XAMPP.
+
+The verified source backup is
+`/home/aslam/Desktop/eduka_rebuild_backup_20261027_2148.sql`. The reviewed
+non-destructive SQL exports and phpMyAdmin procedure are in
+[`database/exports/README.md`](../database/exports/README.md). The exports were
+not imported automatically because XAMPP is currently stopped and its default
+port 3306 conflicts with the active system MySQL. Start or reconfigure XAMPP
+through its normal privileged control, then verify the target before import.
+Never use `migrate:fresh`, `db:wipe`, `DROP DATABASE`, `TRUNCATE TABLE`, or a
+destructive import for this data.
+
 ## Vercel + TiDB Cloud architecture
 
 Vercel does not provide Laravel as a first-party runtime. The repository uses the community `vercel-php@0.7.4` runtime, which targets PHP 8.3, with `api/index.php` forwarding requests to Laravel’s `public/index.php`. The static Vite bundle is routed from `public/build`; all dynamic routes go through the PHP function. Vercel’s function filesystem is read-only except for temporary `/tmp`, so it is not a suitable permanent location for sessions, cache, logs, or assignment files.
 
-The Vercel project `eduka-learning-portal` was created in the authenticated account and connected to `https://github.com/aslambari07/eduka` on the `main` repository. The latest Preview deployment is `dpl_J1CS21m5RHPiT2dV2A5ytAf8aNgZ`, status `READY`, at `https://eduka-learning-portal-raq496ukn-aslambari07s-projects.vercel.app`. Preview deployment protection remains enabled.
+The Vercel project `eduka-learning-portal` exists in the authenticated account. The CLI project inspection currently reports `gitRepository: null` and `productionBranch: null`, so the repository association and Production Branch still require confirmation in Project Settings; no Git/Production setting was changed by this audit. The latest Preview deployment of local commit `533dc1b` is `dpl_ECpZR1DZnS6zaNaPev64h6qZkGq1`, status `READY`, at `https://eduka-learning-portal-ntstmc3ty-aslambari07s-projects.vercel.app`. Preview deployment protection remains enabled, so anonymous HTTP requests may be redirected to Vercel SSO; authenticated CLI checks were used for runtime verification.
 
-The first Preview build failed because Vercel inferred the Vite default output directory `dist`; setting `outputDirectory` to `public` fixed the build. A later runtime failure caused by stale development `bootstrap/cache` and missing production service discovery was fixed by retaining a verified production-only service manifest. The remote project now reports Node `22.x` and build command `npm run build`, matching `vercel.json` and `package.json`. `/up` and `/build/manifest.json` return `200`; authenticated requests to `/` and `/masuk` still return `500` because no TiDB connection variables are configured.
+The first Preview build failed because Vercel inferred the Vite default output directory `dist`; setting `outputDirectory` to `public` fixed the build. A later runtime failure caused by stale development `bootstrap/cache` and missing production service discovery was fixed by retaining a verified production-only service manifest. The remote project now reports Node `22.x` and build command `npm run build`, matching `vercel.json` and `package.json`. On the latest Preview, authenticated CLI checks reached `/up` successfully and read `/build/manifest.json`; authenticated requests to `/`, `/kelas`, and `/masuk` returned `500` because no TiDB connection variables are configured.
 
-The current Preview log audit shows that those failing requests reach Laravel's HTTP kernel and terminate in the application request path. This is consistent with the source: `/` executes database queries for published courses/categories, while database-backed sessions are enabled for `/masuk`. The Vercel environment list contains only the application key, URL, and debug setting; it contains no `DB_*` variables. The serverless config now pins `DB_CONNECTION=mysql` so it cannot silently fall back to a local SQLite file, but a verified TiDB host, non-system schema, rotated user/password, and TLS CA are still required before a new Preview deployment can pass.
+The current Preview log audit shows that those failing requests reach Laravel's HTTP kernel and terminate in the application request path. This is consistent with the source: `/` and `/kelas` execute database queries for published courses/categories, while database-backed sessions are enabled for `/masuk`. The Vercel environment list currently contains only `APP_DEBUG`, `APP_URL`, and `APP_KEY`; it contains no `DB_*`, TLS CA, or private-storage variables. The serverless config now pins `DB_CONNECTION=mysql` so it cannot silently fall back to a local SQLite file, but a verified TiDB host, non-system schema, rotated user/password, and TLS CA are still required before a new Preview deployment can pass.
 
 Required Vercel environment variables (values belong in Project Settings, never in `vercel.json` or Git):
 
@@ -21,18 +39,20 @@ Required Vercel environment variables (values belong in Project Settings, never 
 - `EDUKA_PRIVATE_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, and optional `AWS_ENDPOINT`/`AWS_URL` for a private S3-compatible bucket.
 - Production SMTP variables if password reset mail is required.
 
+The currently missing minimum Preview inputs are `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, and either `DB_SSL_CA` or `MYSQL_ATTR_SSL_CA`; `MYSQL_ATTR_SSL_VERIFY_SERVER_CERT` must remain `true`. For the current serverless defaults, `SESSION_DRIVER=database`, `CACHE_STORE=database`, and `QUEUE_CONNECTION=sync` also require the corresponding schema tables after an approved migration. Secret values must be entered in Vercel Project Settings or another secret manager, never sent in chat or committed to Git.
+
 The local MCP configuration currently points at the TiDB system schema `sys` and contains a database credential. That schema is not accepted as the EDUKA application database, and the credential must be rotated before any cloud connection or deployment. The MCP server is ignored by Git and was not used to migrate data in this audit.
 
 Deployment sequence after the target and credentials are supplied:
 
-1. Create or select the exact Vercel project and connect the intended repository/branch. **Completed for `eduka-learning-portal` / `main`.**
+1. Create or select the exact Vercel project and confirm the intended repository/Production Branch in Project Settings. **Project exists; CLI currently reports the Git repository and Production Branch as unset/unconfirmed.**
 2. Create or verify an empty, non-system TiDB application schema and restricted database user; take a backup if the schema is not empty.
 3. Add the production environment variables in Vercel Preview first. Do not add demo credentials or run `DemoCourseSeeder`.
 4. Deploy a Preview, inspect build/function logs, then run `php artisan migrate --force` against the verified schema only after confirming the migration list, backup, and explicit owner approval. **Build and runtime health are partially verified; DB-dependent requests are not.**
 5. Smoke-test HTTPS, assets, session login, all roles, enrollment, quiz, assignment submission/grading, certificate PDF, and private S3 download.
 6. Promote to Production only after Preview passes and the owner explicitly approves the promotion.
 
-The Preview URL and build/runtime logs are now real evidence of a successful Preview build, not Production readiness. Vercel history also contains an earlier failed Production deployment (`dpl_AV3M4g8EBTgByfcYj2DRumWARFYa`); no successful Production promotion is being claimed. A successful Production deployment, commit linkage, TiDB application connection, migration result, and full feature smoke test are still required before marking deployment successful.
+The Preview URL and build/runtime logs are real evidence of a successful Preview build, not Production readiness. The production domain currently returns Vercel `404 DEPLOYMENT_NOT_FOUND`; Vercel history contains an earlier failed Production deployment (`dpl_AV3M4g8EBTgByfcYj2DRumWARFYa`) and no successful Production promotion is being claimed. A successful Production deployment/alias, commit linkage, TiDB application connection, migration result, private-storage test, and full feature smoke test are still required before marking deployment successful.
 
 ## Hosting requirements
 

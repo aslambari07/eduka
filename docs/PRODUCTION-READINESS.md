@@ -3,13 +3,30 @@
 Tanggal pemeriksaan: 27 Oktober 2026  
 Status: **siap untuk staging/local verification; belum diklaim siap hosting produksi**.
 
+## Local MySQL/XAMPP migration checkpoint
+
+The requested target `eduka_v1` is not yet active because XAMPP's MySQL/MariaDB
+service is stopped and its configured default port 3306 is occupied by the
+separate system MySQL instance. The active Laravel `.env` therefore remains on
+the preserved `eduka_rebuild` source. This is intentional: no target database
+was created on the wrong instance and no existing data was overwritten.
+
+Before switching `.env` to `eduka_v1`, an operator must start XAMPP, confirm its
+actual port and root/database credentials, create only `eduka_v1`, verify that
+it is empty or back it up if it is not, and import the reviewed files in
+[`database/exports/README.md`](../database/exports/README.md). The source backup
+is `/home/aslam/Desktop/eduka_rebuild_backup_20261027_2148.sql`; it was verified
+non-empty before export generation. This workspace cannot start the privileged
+XAMPP service from the current user session, so target connection and import
+remain **BELUM DIVERIFIKASI**.
+
 ## Bukti yang sudah tersedia
 
 - Laravel 13 pada PHP 8.3.14.
 - PDF certificate: `barryvdh/laravel-dompdf` 3.1.2 dengan Dompdf 3.1.6; pure PHP, tanpa Chrome/wkhtmltopdf/runtime Node.
 - Migration lengkap dan `php artisan migrate:status --no-ansi` menunjukkan seluruh 20 migration `Ran` pada database development.
 - Test memakai database MySQL terpisah sesuai `phpunit.xml`, bukan database development/production.
-- `php artisan test --compact`: **103 passed, 720 assertions**.
+- `php artisan test --compact --no-ansi`, `composer test`, and `vendor/bin/phpunit`: **103 passed, 720 assertions** each.
 - `php artisan view:cache`: **passed**.
 - `npm run build`: **passed**; asset Vite production terbentuk.
 - `php artisan route:list --no-ansi`: **69 routes**; pemeriksaan nama route tidak menemukan duplikasi.
@@ -20,8 +37,8 @@ Status: **siap untuk staging/local verification; belum diklaim siap hosting prod
 - PDF certificate owner-only menghasilkan `application/pdf`, filename aman `.pdf`, signature `%PDF-`, satu halaman A4 landscape, dan cache private/no-store. Dompdf remote/PHP/JavaScript execution dimatikan.
 - Assignment upload policy is centralized at 5120 KB (5 MiB), with `pdf`, `zip`, and `docx` authoring choices, MIME/content validation, extension validation, private storage, and friendly oversized-request handling.
 - Development participant acceptance completed through real HTTP routes on `eduka_rebuild`: four enrollments completed, four server-scored quizzes passed, all required assignments graded by the authorized instructor, four certificates persisted exactly once, and four owner-only PDF downloads verified.
-- Vercel Preview: project `eduka-learning-portal` is connected to `aslambari07/eduka`, Node 22.x and `npm run build` are configured, and deployment `dpl_J1CS21m5RHPiT2dV2A5ytAf8aNgZ` is `READY`. `/up` and `/build/manifest.json` returned `200` through authenticated Preview checks. Authenticated `/` and `/masuk` requests returned `500`; the Preview environment has no `DB_*` variables, so the DB-dependent routes cannot run. No TiDB migration or successful Production promotion was performed; Vercel history contains one earlier failed Production deployment.
-- `storage/logs/laravel.log` masih menyimpan error historis `is_required` pada 05:07–05:10 sebelum migration diterapkan; log tidak dihapus. Setelah migration, seeding lokal, dan smoke HTTP terakhir tidak ada entri baru.
+- Vercel Preview: project `eduka-learning-portal` exists, Node 22.x and `npm run build` are configured, and the deployment of local commit `533dc1b`, `dpl_ECpZR1DZnS6zaNaPev64h6qZkGq1`, is `READY` at `https://eduka-learning-portal-ntstmc3ty-aslambari07s-projects.vercel.app`. `vercel project inspect --json` reports `gitRepository: null` and `productionBranch: null`, so repository/branch linkage remains unconfirmed in the Dashboard. Authenticated CLI checks reached `/up` and read `/build/manifest.json`; authenticated `/`, `/kelas`, and `/masuk` requests returned `500`. Preview currently contains only `APP_DEBUG`, `APP_URL`, and `APP_KEY`, with no `DB_*`, TLS CA, or private-storage variables, so DB-dependent routes and feature tests cannot run. No TiDB migration or successful Production promotion was performed; the Production domain still returns `404 DEPLOYMENT_NOT_FOUND` and Vercel history contains one earlier failed Production deployment.
+- `storage/logs/laravel.log` masih menyimpan error historis `is_required` pada 05:07–05:10 sebelum migration diterapkan; log tidak dihapus. Audit ini juga sempat mencatat satu kegagalan CLI `Command "test" is not defined` sebelum package-discovery cache diregenerasi. Setelah cache diperbaiki, test dan smoke HTTP berikutnya lulus; seluruh riwayat error tetap dipertahankan.
 - Browser smoke lokal dengan Chrome/CDP: login dan landing Admin/Pengajar/Peserta berhasil; screenshot dashboard role dan halaman publik utama diperiksa. Dashboard Peserta pada viewport 390px tidak menunjukkan horizontal overflow.
 
 ## Functional readiness
@@ -65,7 +82,7 @@ Status `BELUM DIVERIFIKASI`: PHP/ext dan versi database di cPanel target, effect
 ## Blocker dan risiko tersisa
 
 1. **Blocker hosting:** belum ada target server, credentials, DNS, web server/PHP-FPM, SMTP, atau bukti restore; deployment produksi belum dilakukan.
-2. **Blocker Vercel/TiDB:** Vercel project dan GitHub repository sudah terhubung, tetapi Preview application routes `/` dan `/masuk` masih `500` karena environment DB belum diisi. `DB_CONNECTION=mysql` sudah dipatok pada konfigurasi serverless, tetapi host, port, schema aplikasi non-`sys`, user/password yang sudah dirotasi, dan CA TLS belum tersedia. TiDB MCP menunjuk schema sistem `sys`, bukan schema aplikasi yang terverifikasi, dan credential lokal harus dirotasi sebelum digunakan.
+2. **Blocker Vercel/TiDB:** Vercel project dan GitHub repository sudah terhubung, tetapi Preview application routes `/`, `/kelas`, dan `/masuk` masih `500` karena environment DB belum diisi. `DB_CONNECTION=mysql` sudah dipatok pada konfigurasi serverless, tetapi `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, serta `DB_SSL_CA` atau `MYSQL_ATTR_SSL_CA` belum tersedia. Schema aplikasi non-`sys`, user/password yang sudah dirotasi, CA TLS, dan persetujuan migrasi cloud belum tersedia. TiDB MCP menunjuk schema sistem `sys`, bukan schema aplikasi yang terverifikasi, dan credential lokal harus dirotasi sebelum digunakan.
 3. **Blocker private storage:** object storage S3-compatible dan credentials belum disediakan. Tanpa `EDUKA_PRIVATE_DISK=s3` serta bucket privat, assignment files tidak boleh dianggap durable di Vercel.
 4. **Verifikasi visual penuh:** smoke Chrome lokal sudah dilakukan, tetapi belum ada pixel parity Superdesign atau browser CRUD/upload/modal end-to-end.
 5. **Sertifikat:** PDF dibuat on-demand dan tidak disimpan sebagai file publik. PDF sudah diverifikasi lokal; font/aset dan memory limit tetap perlu diuji pada target Vercel/TiDB dengan nama/course terpanjang.
