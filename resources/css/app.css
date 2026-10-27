@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+:root {
+    --eduka-background: #0B1120;
+    --eduka-section: #111827;
+    --eduka-panel: #172033;
+    --eduka-panel-hover: #1E293B;
+    --eduka-border: #2B3648;
+    --eduka-text-primary: #F9FAFB;
+    --eduka-text-secondary: #CBD5E1;
+    --eduka-text-meta: #94A3B8;
+    --eduka-green: #22C55E;
+    --eduka-green-hover: #16A34A;
+    --eduka-input: #111827;
+    --eduka-input-border: #374151;
+    --eduka-error-bg: #3A1720;
+    --eduka-error-text: #FECDD3;
+    --eduka-success-bg: #12321F;
+    --eduka-success-text: #BBF7D0;
+    --eduka-ink: #0B1120;
+    --eduka-accent: #22C55E;
+    --eduka-light-surface: #FFFFFF;
+    --eduka-light-surface-muted: #F8FAFC;
+    --eduka-light-text-primary: #111827;
+    --eduka-light-text-secondary: #4B5563;
+    --eduka-light-text-meta: #64748B;
+    --eduka-light-border: #E5E7EB;
+    --eduka-light-green: #15803D;
+    --eduka-light-green-hover: #166534;
+}
+
+@theme { --font-display: 'Archivo', sans-serif; --font-body: 'Manrope', sans-serif; }
+
+* { scroll-behavior: smooth; }
+body { margin: 0; background: var(--eduka-background); color: var(--eduka-text-primary); font-family: 'Manrope', sans-serif; }
+body.eduka-app { background: var(--eduka-background); color: var(--eduka-text-primary); }
+.font-display { font-family: 'Archivo', sans-serif; }
+.font-body { font-family: 'Manrope', sans-serif; }
+
+/* Semantic project surfaces used by both the public shell and workspaces. */
+.eduka-theme-dark { color-scheme: dark; }
+.eduka-surface-light { background: var(--eduka-light-surface); color: var(--eduka-light-text-primary); }
+.eduka-surface-muted { background: var(--eduka-light-surface-muted); color: var(--eduka-light-text-primary); }
+.eduka-section-dark { background: var(--eduka-background); color: var(--eduka-text-primary); color-scheme: dark; }
+.eduka-section-light { background: var(--eduka-light-surface); color: var(--eduka-light-text-primary); color-scheme: light; }
+.eduka-section-light-muted { background: var(--eduka-light-surface-muted); color: var(--eduka-light-text-primary); color-scheme: light; }
+.eduka-section { background: var(--eduka-section); color: var(--eduka-text-primary); }
+.eduka-panel,
+.eduka-card { background: var(--eduka-panel); border-color: var(--eduka-border); color: var(--eduka-text-primary); }
+.eduka-panel:hover,
+.eduka-card:hover { background: var(--eduka-panel-hover); }
+.eduka-text-primary { color: var(--eduka-text-primary); }
+.eduka-text-secondary { color: var(--eduka-text-secondary); }
+.eduka-text-meta { color: var(--eduka-text-meta); }
+.eduka-border { border-color: var(--eduka-border); }
+.eduka-button-primary { background: var(--eduka-green); color: var(--eduka-ink); }
+.eduka-button-primary:hover { background: var(--eduka-green-hover); }
+.eduka-button-secondary { border: 1px solid var(--eduka-border); background: var(--eduka-panel); color: var(--eduka-text-primary); }
+.eduka-button-secondary:hover { border-color: var(--eduka-green); background: var(--eduka-panel-hover); color: #86EFAC; }
+.eduka-card-light { background: var(--eduka-light-surface); border-color: var(--eduka-light-border); color: var(--eduka-light-text-primary); }
+.eduka-card-light:hover { background: var(--eduka-light-surface-muted); border-color: #86EFAC; }
+.eduka-heading-light { color: var(--eduka-light-text-primary); }
+.eduka-copy-light { color: var(--eduka-light-text-secondary); }
+.eduka-meta-light { color: var(--eduka-light-text-meta); }
+.eduka-link-light { color: var(--eduka-light-green); }
+.eduka-link-light:hover { color: var(--eduka-light-green-hover); }
+.eduka-border-light { border-color: var(--eduka-light-border); }
+.eduka-button-light-primary { background: var(--eduka-light-green); color: #FFFFFF; }
+.eduka-button-light-primary:hover { background: var(--eduka-light-green-hover); }
+.eduka-button-danger-light { border: 1px solid #FDA4AF; background: #FFF1F2; color: #BE123C; }
+.eduka-button-danger-light:hover { background: #FFE4E6; color: #9F1239; }
+.eduka-cta-light { background: var(--eduka-light-green); color: #FFFFFF; }
+.eduka-footer-dark { background: var(--eduka-background); color: var(--eduka-text-secondary); }
+.eduka-workspace-shell { color-scheme: dark; }
+.eduka-workspace-sidebar { min-height: 100vh; }
+.eduka-workspace-nav-item { display: flex; align-items: center; gap: .75rem; border-radius: .75rem; padding: .75rem; color: var(--eduka-text-secondary); font-size: .875rem; font-weight: 600; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+.eduka-workspace-nav-item:hover { background: rgba(255, 255, 255, .05); color: var(--eduka-text-primary); }
+.eduka-workspace-nav-item:focus-visible { outline: 3px solid #86EFAC; outline-offset: 2px; }
+.eduka-workspace-nav-item-active { background: rgba(34, 197, 94, .12); color: #86EFAC; }
+.eduka-workspace-nav-item-active:hover { background: rgba(34, 197, 94, .16); color: #BBF7D0; }
+.eduka-workspace-nav-dot { width: .45rem; height: .45rem; flex: 0 0 auto; border: 1px solid currentColor; border-radius: 999px; opacity: .65; }
+.eduka-workspace-nav-item-active .eduka-workspace-nav-dot { background: currentColor; opacity: 1; }
+.eduka-workspace-header { backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.eduka-workspace-header summary::-webkit-details-marker { display: none; }
+.eduka-alert-success { border-color: rgba(34, 197, 94, .45); background: var(--eduka-success-bg); color: var(--eduka-success-text); }
+.eduka-alert-error { border-color: rgba(244, 63, 94, .45); background: var(--eduka-error-bg); color: var(--eduka-error-text); }
+.eduka-input,
+.eduka-input-light { border-color: var(--eduka-input-border); background: var(--eduka-input); color: var(--eduka-text-primary); }
+.eduka-input::placeholder,
+.eduka-input-light::placeholder { color: var(--eduka-text-meta); }
+
+/* Normalize legacy Tailwind utility colors inside the dark application shell. */
+.eduka-app .bg-zinc-950 { background-color: var(--eduka-background); }
+.eduka-app .bg-zinc-900 { background-color: var(--eduka-section); }
+.eduka-app .bg-zinc-800 { background-color: var(--eduka-panel); }
+.eduka-app .bg-zinc-100,
+.eduka-app .bg-zinc-50,
+.eduka-app .bg-gray-100,
+.eduka-app .bg-gray-50 { background-color: var(--eduka-section); }
+.eduka-app .bg-white { background-color: var(--eduka-panel); }
+.eduka-app [class*="bg-white/"] { background-color: rgba(255, 255, 255, .05); }
+.eduka-app [class*="bg-black/"] { background-color: var(--eduka-input); }
+.eduka-app .bg-emerald-50 { background-color: var(--eduka-success-bg); }
+.eduka-app .bg-emerald-400,
+.eduka-app .bg-emerald-300 { background-color: var(--eduka-green); }
+.eduka-app .bg-amber-50 { background-color: #332812; }
+.eduka-app .bg-rose-50 { background-color: var(--eduka-error-bg); }
+.eduka-app [class*="bg-[#15803D]"] { background-color: var(--eduka-green); }
+
+.eduka-app .text-white,
+.eduka-app .text-zinc-900,
+.eduka-app .text-zinc-800,
+.eduka-app .text-zinc-200 { color: var(--eduka-text-primary); }
+.eduka-app .text-zinc-700,
+.eduka-app .text-zinc-600,
+.eduka-app .text-zinc-400,
+.eduka-app .text-zinc-300 { color: var(--eduka-text-secondary); }
+.eduka-app .text-zinc-500 { color: var(--eduka-text-meta); }
+.eduka-app .text-gray-900,
+.eduka-app .text-gray-800,
+.eduka-app .text-gray-700,
+.eduka-app .text-gray-600,
+.eduka-app .text-gray-500,
+.eduka-app .text-gray-400 { color: var(--eduka-text-secondary); }
+.eduka-app .text-emerald-900,
+.eduka-app .text-emerald-800,
+.eduka-app .text-emerald-700 { color: #86EFAC; }
+.eduka-app .text-emerald-300,
+.eduka-app .text-emerald-200 { color: #86EFAC; }
+.eduka-app .text-amber-900,
+.eduka-app .text-amber-800,
+.eduka-app .text-amber-700 { color: #FCD34D; }
+.eduka-app .text-rose-900,
+.eduka-app .text-rose-800,
+.eduka-app .text-rose-700 { color: var(--eduka-error-text); }
+.eduka-app [class*="text-[#111827]"] { color: var(--eduka-text-primary); }
+
+.eduka-app .border-zinc-100,
+.eduka-app .border-zinc-200,
+.eduka-app .border-zinc-300,
+.eduka-app .border-gray-100,
+.eduka-app .border-gray-200,
+.eduka-app .border-gray-300,
+.eduka-app [class*="border-[#E5E7EB]"] { border-color: var(--eduka-border); }
+.eduka-app [class*="border-white"] { border-color: var(--eduka-border); }
+.eduka-app .border-emerald-200,
+.eduka-app .border-emerald-300 { border-color: rgba(34, 197, 94, .45); }
+.eduka-app .border-rose-200,
+.eduka-app .border-rose-300 { border-color: rgba(244, 63, 94, .45); }
+.eduka-app .border-amber-200 { border-color: rgba(245, 158, 11, .45); }
+.eduka-app [class*="from-white"] { --tw-gradient-from: var(--eduka-panel) var(--tw-gradient-from-position); }
+.eduka-app [class*="to-emerald-50"] { --tw-gradient-to: var(--eduka-section) var(--tw-gradient-to-position); }
+
+/* Light sections intentionally opt out of the dark-shell normalization above. */
+.eduka-app .eduka-section-light,
+.eduka-app .eduka-section-light-muted { color: var(--eduka-light-text-primary); }
+.eduka-app .eduka-section-light .eduka-text-primary,
+.eduka-app .eduka-section-light-muted .eduka-text-primary,
+.eduka-app .eduka-section-light .text-white,
+.eduka-app .eduka-section-light-muted .text-white,
+.eduka-app .eduka-section-light .text-zinc-950,
+.eduka-app .eduka-section-light-muted .text-zinc-950,
+.eduka-app .eduka-section-light .text-zinc-900,
+.eduka-app .eduka-section-light-muted .text-zinc-900,
+.eduka-app .eduka-section-light .text-zinc-800,
+.eduka-app .eduka-section-light-muted .text-zinc-800,
+.eduka-app .eduka-section-light [class*="text-[#111827]"],
+.eduka-app .eduka-section-light-muted [class*="text-[#111827]"] { color: var(--eduka-light-text-primary); }
+.eduka-app .eduka-section-light .eduka-text-secondary,
+.eduka-app .eduka-section-light-muted .eduka-text-secondary,
+.eduka-app .eduka-section-light .text-zinc-700,
+.eduka-app .eduka-section-light .text-zinc-600,
+.eduka-app .eduka-section-light .text-zinc-500,
+.eduka-app .eduka-section-light .text-zinc-400,
+.eduka-app .eduka-section-light .text-zinc-300,
+.eduka-app .eduka-section-light-muted .text-zinc-700,
+.eduka-app .eduka-section-light-muted .text-zinc-600,
+.eduka-app .eduka-section-light-muted .text-zinc-500,
+.eduka-app .eduka-section-light-muted .text-zinc-400,
+.eduka-app .eduka-section-light-muted .text-zinc-300,
+.eduka-app .eduka-section-light .text-gray-900,
+.eduka-app .eduka-section-light .text-gray-800,
+.eduka-app .eduka-section-light .text-gray-700,
+.eduka-app .eduka-section-light .text-gray-600,
+.eduka-app .eduka-section-light .text-gray-500,
+.eduka-app .eduka-section-light .text-gray-400,
+.eduka-app .eduka-section-light-muted .text-gray-900,
+.eduka-app .eduka-section-light-muted .text-gray-800,
+.eduka-app .eduka-section-light-muted .text-gray-700,
+.eduka-app .eduka-section-light-muted .text-gray-600,
+.eduka-app .eduka-section-light-muted .text-gray-500,
+.eduka-app .eduka-section-light-muted .text-gray-400 { color: var(--eduka-light-text-secondary); }
+.eduka-app .eduka-section-light .text-emerald-900,
+.eduka-app .eduka-section-light .text-emerald-800,
+.eduka-app .eduka-section-light .text-emerald-700,
+.eduka-app .eduka-section-light .text-emerald-300,
+.eduka-app .eduka-section-light-muted .text-emerald-900,
+.eduka-app .eduka-section-light-muted .text-emerald-800,
+.eduka-app .eduka-section-light-muted .text-emerald-700,
+.eduka-app .eduka-section-light-muted .text-emerald-300 { color: var(--eduka-light-green); }
+.eduka-app .eduka-section-light .eduka-button-primary,
+.eduka-app .eduka-section-light-muted .eduka-button-primary { background: var(--eduka-light-green); color: #FFFFFF; }
+.eduka-app .eduka-section-light .bg-emerald-300.text-zinc-950,
+.eduka-app .eduka-section-light .bg-emerald-400.text-zinc-950,
+.eduka-app .eduka-section-light-muted .bg-emerald-300.text-zinc-950,
+.eduka-app .eduka-section-light-muted .bg-emerald-400.text-zinc-950 { color: #FFFFFF; }
+.eduka-app .eduka-section-light .eduka-button-primary:hover,
+.eduka-app .eduka-section-light-muted .eduka-button-primary:hover { background: var(--eduka-light-green-hover); }
+.eduka-app .eduka-section-light .eduka-button-secondary,
+.eduka-app .eduka-section-light-muted .eduka-button-secondary { border-color: var(--eduka-light-border); background: var(--eduka-light-surface); color: var(--eduka-light-text-primary); }
+.eduka-app .eduka-section-light .eduka-button-secondary:hover,
+.eduka-app .eduka-section-light-muted .eduka-button-secondary:hover { border-color: var(--eduka-light-green); background: var(--eduka-light-surface-muted); color: var(--eduka-light-green); }
+.eduka-app .eduka-section-light .eduka-cta-light,
+.eduka-app .eduka-section-light-muted .eduka-cta-light { background: var(--eduka-light-green); color: #FFFFFF; }
+.eduka-app .eduka-section-light .glass,
+.eduka-app .eduka-section-light-muted .glass { background: var(--eduka-light-surface); border-color: var(--eduka-light-border); color: var(--eduka-light-text-primary); }
+.eduka-app .eduka-section-light .bg-white,
+.eduka-app .eduka-section-light-muted .bg-white { background-color: var(--eduka-light-surface); }
+.eduka-app .eduka-section-light .bg-zinc-100,
+.eduka-app .eduka-section-light-muted .bg-zinc-100,
+.eduka-app .eduka-section-light .bg-zinc-50,
+.eduka-app .eduka-section-light-muted .bg-zinc-50,
+.eduka-app .eduka-section-light .bg-gray-100,
+.eduka-app .eduka-section-light-muted .bg-gray-100,
+.eduka-app .eduka-section-light .bg-gray-50,
+.eduka-app .eduka-section-light-muted .bg-gray-50 { background-color: var(--eduka-light-surface-muted); }
+.eduka-app .eduka-section-light [class*="from-white"],
+.eduka-app .eduka-section-light-muted [class*="from-white"] { --tw-gradient-from: var(--eduka-light-surface) var(--tw-gradient-from-position); }
+.eduka-app .eduka-section-light [class*="to-emerald-50"],
+.eduka-app .eduka-section-light-muted [class*="to-emerald-50"] { --tw-gradient-to: #ECFDF5 var(--tw-gradient-to-position); }
+.eduka-app .eduka-section-light .bg-zinc-950,
+.eduka-app .eduka-section-light-muted .bg-zinc-950 { background-color: var(--eduka-light-green); }
+.eduka-app .eduka-section-light .bg-emerald-300,
+.eduka-app .eduka-section-light .bg-emerald-400,
+.eduka-app .eduka-section-light-muted .bg-emerald-300,
+.eduka-app .eduka-section-light-muted .bg-emerald-400 { background-color: var(--eduka-light-green); }
+.eduka-app .eduka-section-light .bg-emerald-50,
+.eduka-app .eduka-section-light-muted .bg-emerald-50 { background-color: #ECFDF5; }
+.eduka-app .eduka-section-light .bg-amber-50,
+.eduka-app .eduka-section-light-muted .bg-amber-50 { background-color: #FFFBEB; }
+.eduka-app .eduka-section-light .text-amber-900,
+.eduka-app .eduka-section-light-muted .text-amber-900 { color: #92400E; }
+.eduka-app .eduka-section-light .text-amber-700,
+.eduka-app .eduka-section-light-muted .text-amber-700 { color: #B45309; }
+.eduka-app .eduka-section-light [class*="bg-white/"],
+.eduka-app .eduka-section-light-muted [class*="bg-white/"] { background-color: rgba(17, 24, 39, .05); }
+.eduka-app .eduka-section-light .border-white,
+.eduka-app .eduka-section-light-muted .border-white,
+.eduka-app .eduka-section-light [class*="border-white"],
+.eduka-app .eduka-section-light-muted [class*="border-white"],
+.eduka-app .eduka-section-light .border-zinc-100,
+.eduka-app .eduka-section-light .border-zinc-200,
+.eduka-app .eduka-section-light .border-zinc-300,
+.eduka-app .eduka-section-light-muted .border-zinc-100,
+.eduka-app .eduka-section-light-muted .border-zinc-200,
+.eduka-app .eduka-section-light-muted .border-zinc-300,
+.eduka-app .eduka-section-light [class*="border-[#E5E7EB]"],
+.eduka-app .eduka-section-light-muted [class*="border-[#E5E7EB]"] { border-color: var(--eduka-light-border); }
+.eduka-app .eduka-section-light .border-amber-200,
+.eduka-app .eduka-section-light-muted .border-amber-200 { border-color: #FDE68A; }
+.eduka-app .eduka-section-light .eduka-input,
+.eduka-app .eduka-section-light .eduka-input-light,
+.eduka-app .eduka-section-light-muted .eduka-input,
+.eduka-app .eduka-section-light-muted .eduka-input-light { border-color: #D1D5DB; background: var(--eduka-light-surface); color: var(--eduka-light-text-primary); }
+.eduka-app .eduka-section-light .eduka-input::placeholder,
+.eduka-app .eduka-section-light .eduka-input-light::placeholder,
+.eduka-app .eduka-section-light-muted .eduka-input::placeholder,
+.eduka-app .eduka-section-light-muted .eduka-input-light::placeholder { color: var(--eduka-light-text-meta); }
+.eduka-app .eduka-section-light input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+.eduka-app .eduka-section-light textarea,
+.eduka-app .eduka-section-light select,
+.eduka-app .eduka-section-light-muted input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+.eduka-app .eduka-section-light-muted textarea,
+.eduka-app .eduka-section-light-muted select { border-color: #D1D5DB; background: var(--eduka-light-surface); color: var(--eduka-light-text-primary); }
+.eduka-app .eduka-section-light select option,
+.eduka-app .eduka-section-light-muted select option { background: var(--eduka-light-surface); color: var(--eduka-light-text-primary); }
+.eduka-app .eduka-section-light .eduka-cta-light .text-white,
+.eduka-app .eduka-section-light-muted .eduka-cta-light .text-white { color: #FFFFFF; }
+.eduka-app .eduka-section-light .eduka-card-cover,
+.eduka-app .eduka-section-light-muted .eduka-card-cover { color: var(--eduka-text-primary); }
+.eduka-app .eduka-section-light .eduka-card-cover .text-white,
+.eduka-app .eduka-section-light-muted .eduka-card-cover .text-white { color: var(--eduka-text-primary); }
+.eduka-app .eduka-section-light .eduka-card-cover .text-zinc-500,
+.eduka-app .eduka-section-light .eduka-card-cover .text-zinc-400,
+.eduka-app .eduka-section-light-muted .eduka-card-cover .text-zinc-500,
+.eduka-app .eduka-section-light-muted .eduka-card-cover .text-zinc-400 { color: var(--eduka-text-meta); }
+.eduka-app .eduka-section-light .eduka-card-cover .text-emerald-300,
+.eduka-app .eduka-section-light-muted .eduka-card-cover .text-emerald-300 { color: #86EFAC; }
+
+/* Form controls must not fall back to a white browser surface. */
+.eduka-app input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+.eduka-app textarea,
+.eduka-app select { border-color: var(--eduka-input-border); background-color: var(--eduka-input); color: var(--eduka-text-primary); }
+.eduka-app input::placeholder,
+.eduka-app textarea::placeholder { color: var(--eduka-text-meta); opacity: 1; }
+.eduka-app select option { background: var(--eduka-input); color: var(--eduka-text-primary); }
+.eduka-app input[type='file'] { color: var(--eduka-text-secondary); }
+.eduka-app input[type='checkbox'],
+.eduka-app input[type='radio'] { accent-color: var(--eduka-green); }
+.eduka-app input:disabled { background: var(--eduka-section); color: var(--eduka-text-meta); opacity: 1; }
+
+.glass { background: var(--eduka-panel); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--eduka-border); }
+.soft-shadow { box-shadow: 0 20px 60px rgba(0, 0, 0, .28); }
+.card-hover { transition: transform .35s cubic-bezier(.16,1,.3,1), background-color .2s ease, box-shadow .35s cubic-bezier(.16,1,.3,1); }
+.card-hover:hover { transform: translateY(-6px); background: var(--eduka-panel-hover); box-shadow: 0 22px 45px rgba(0, 0, 0, .28); }
+.eduka-app .eduka-card-light.card-hover:hover { background: var(--eduka-light-surface-muted); border-color: #86EFAC; box-shadow: 0 22px 45px rgba(15, 23, 42, .10); }
+.fade-up { animation: rise .8s cubic-bezier(.16,1,.3,1) both; }
+.hero-glow { background: radial-gradient(circle at 74% 42%, rgba(34,197,94,.15), transparent 24%), radial-gradient(circle at 40% 10%, rgba(34,197,94,.08), transparent 25%), linear-gradient(120deg, #0B1120 0%, #111827 58%, #172033 100%); }
+.hero-catalog { background: radial-gradient(circle at 78% 14%, rgba(34,197,94,.18), transparent 19%), radial-gradient(circle at 18% 70%, rgba(22,163,74,.12), transparent 27%), linear-gradient(135deg, #0B1120 0%, #111827 54%, #172033 100%); }
+.noise { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"); }
+
+:where(a, button, input, select, textarea):focus-visible { outline: 3px solid #86EFAC; outline-offset: 3px; }
+button:disabled, [aria-disabled='true'] { cursor: not-allowed; opacity: .6; }
+button, a, input, select, textarea { transition: border-color .2s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

@@ -1,0 +1,8 @@
+@extends('layouts.app', ['title' => $quiz->title.' — EDUKA'])
+@section('content')
+<div class="eduka-page min-h-screen bg-[#0B1120] font-body">
+    <section class="eduka-section-dark hero-glow noise border-b border-white/10 px-5 pb-12 pt-6 text-white sm:px-8 lg:px-16"><div class="mx-auto max-w-[1440px]"><x-navigation /><div class="pt-14"><p class="text-xs font-bold tracking-[.2em] text-emerald-300">EVALUASI PEMBELAJARAN</p><h1 class="mt-4 font-display text-5xl font-semibold tracking-[-.06em]">{{ $quiz->title }}</h1><p class="mt-4 text-sm text-zinc-400">Jawab pertanyaan dengan tenang. Nilai dihitung dari jawaban yang tersimpan di server.</p></div></div></section>
+    <main class="eduka-section-light px-5 py-8 sm:px-8 lg:py-12"><form method="POST" action="{{ route('learning.quiz.submit', [$course, $quiz]) }}" class="mx-auto max-w-4xl space-y-5">@csrf @foreach($quiz->questions as $question)<fieldset class="eduka-card-light rounded-3xl border p-6"><legend class="eduka-heading-light font-display text-xl font-semibold">{{ $loop->iteration }}. {{ $question->question }}</legend><div class="mt-5 space-y-3">@foreach($question->options as $option)<label class="eduka-copy-light flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-200 bg-slate-50 p-4 text-sm hover:border-emerald-300"><input type="radio" name="answers[{{ $question->id }}]" value="{{ $option->id }}" class="text-emerald-600">{{ $option->option_text }}</label>@endforeach</div></fieldset>@endforeach<button class="eduka-button-light-primary rounded-xl px-6 py-3.5 text-sm font-bold">Kirim jawaban ↗</button></form></main>
+    <x-footer />
+</div>
+@endsection
