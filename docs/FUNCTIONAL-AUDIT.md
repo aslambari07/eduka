@@ -10,7 +10,7 @@ Alur inti Admin, Pengajar, dan Peserta sudah diimplementasikan dan diuji secara 
 
 Hasil verifikasi terakhir:
 
-- `php artisan test --compact`: **102 passed, 717 assertions**.
+- `php artisan test --compact`: **103 passed, 720 assertions**.
 - `php artisan view:cache`: **passed**.
 - `npm run build`: **passed** dengan Vite 7.3.7.
 - `php artisan migrate:status --no-ansi`: seluruh **20 migration Ran**.
@@ -164,6 +164,6 @@ Audit pada `POST /belajar/{course}/tugas/{assignment}` menemukan assignment demo
 
 Perbaikan sekarang memakai `config/eduka.php` dengan batas aplikasi 5120 KB, validasi MIME/content dan ekstensi, pesan error ramah, private `local` storage, serta render khusus `PostTooLargeException` untuk form tugas. Upload invalid PHP tidak diperlakukan sebagai submission tanpa file. Batas server yang direkomendasikan adalah `upload_max_filesize=8M` dan `post_max_size=10M`; nilai default CLI belum diubah karena `/etc/php/8.3/cli/php.ini` root-owned.
 
-Regression test mencakup file valid, file lebih besar dari batas tugas, MIME/ekstensi invalid, request `CONTENT_LENGTH` di atas `post_max_size`, dan `UPLOAD_ERR_INI_SIZE`. Semua lulus dalam suite final 102 test. Upload melalui browser dengan PHP server default belum diklaim berhasil sampai administrator mengaktifkan nilai PHP 8M/10M dan melakukan upload nyata.
+Regression test mencakup file valid, file lebih besar dari batas tugas, MIME/ekstensi invalid, request `CONTENT_LENGTH` di atas `post_max_size`, `UPLOAD_ERR_INI_SIZE`, dan penggunaan disk privat S3 melalui fake storage. Semua lulus dalam suite final 103 test. Upload melalui browser dengan PHP server default belum diklaim berhasil sampai administrator mengaktifkan nilai PHP 8M/10M dan melakukan upload nyata.
 
 Audit log lokal menemukan error historis sebelum perbaikan/migration, termasuk relasi `quiz_options.quiz_question_id`, komponen/view yang belum tersedia, dan `is_required` sebelum migration. Entri terakhir yang terdeteksi bertanggal 27 Oktober 2026 pukul 05:10:07; log tidak dihapus dan tidak ada entri baru setelah migration serta smoke terakhir.

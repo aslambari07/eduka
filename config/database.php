@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Str;
-use Pdo\Mysql;
+
+$mysqlSslCa = env('MYSQL_ATTR_SSL_CA', env('DB_SSL_CA'));
+$mysqlSslVerifyServerCertificate = (bool) env('MYSQL_ATTR_SSL_VERIFY_SERVER_CERT', true);
 
 return [
 
@@ -59,9 +61,10 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') && $mysqlSslCa ? [
+                \PDO::MYSQL_ATTR_SSL_CA => $mysqlSslCa,
+                \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => $mysqlSslVerifyServerCertificate,
+            ] : [],
         ],
 
         'mariadb' => [
@@ -79,9 +82,10 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') && $mysqlSslCa ? [
+                \PDO::MYSQL_ATTR_SSL_CA => $mysqlSslCa,
+                \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => $mysqlSslVerifyServerCertificate,
+            ] : [],
         ],
 
         'pgsql' => [

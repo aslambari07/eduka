@@ -27,6 +27,7 @@ Last verified: 2026-10-27, local workspace `/home/aslam/Desktop/EDUKA`.
 - Guarded account seeder that creates only the three named demo accounts when absent, preserves existing IDs/credentials, and stores new development passwords through Laravel hashing; complete course data is handled by the separate `DemoCourseSeeder`.
 - Server-side PDF certificate generation using `barryvdh/laravel-dompdf` 3.1.2/Dompdf 3.1.6, with A4 landscape template, owner authorization, safe filename, no remote resource loading, and HTML/print fallback retained.
 - Development participant acceptance is complete on the active `eduka_rebuild` database: all four demo courses are enrolled and completed at 100%, with server-scored quiz attempts, instructor-graded assignments, and one persisted certificate/PDF download per course. The exact certificate codes and timestamps are recorded in [FUNCTIONAL-AUDIT.md](FUNCTIONAL-AUDIT.md).
+- Vercel/TiDB preparation: serverless `api/index.php`, pinned `vercel-php@0.7.4` PHP 8.3 runtime, Vercel routing/static asset rules, Node 22 build engine, PDO MySQL TLS hooks, and S3-compatible private assignment disk abstraction.
 
 ## Verification
 
@@ -39,12 +40,13 @@ php artisan route:list
 npm run build
 ```
 
-Latest local results: `php artisan test --compact` passed **102 tests and 717 assertions**; `php artisan route:list --no-ansi` resolved **69 routes** with no duplicate named routes; `php artisan migrate:status --no-ansi` shows all 20 migrations ran; `php artisan view:cache` succeeded; and `npm run build` succeeded with Vite 7.3.7. HTTP smoke reached public pages, Admin, Pengajar, and Peserta entry points with status 200. PHP tests use MySQL because this environment does not expose the SQLite PDO extension. The test database is separate from the development database.
+Latest local results: `php artisan test --compact` passed **103 tests and 720 assertions**; `php artisan route:list --no-ansi` resolved **69 routes** with no duplicate named routes; `php artisan migrate:status --no-ansi` shows all 20 migrations ran; `php artisan view:cache` succeeded; and `npm run build` succeeded with Vite 7.3.7. HTTP smoke reached public pages, Admin, Pengajar, and Peserta entry points with status 200. PHP tests use MySQL because this environment does not expose the SQLite PDO extension. The test database is separate from the development database.
 
 ## Known limitations and follow-up
 
 - Chrome/CDP browser smoke is available and covered login/landing for all three roles plus a 390px Peserta overflow check. Homepage, catalog, and role dashboard screenshots were inspected locally; this is not a pixel-level comparison with Superdesign. The complete HTML/draft audit and local route/build checks are recorded in [SUPERDESIGN-UI-AUDIT.md](SUPERDESIGN-UI-AUDIT.md).
 - SMTP, HTTPS, server permissions, backups, and actual hosting deployment require environment-specific configuration and have not been claimed as live.
+- Vercel project `eduka-learning-portal` is created and linked to `aslambari07/eduka`; latest protected Preview `dpl_J1CS21m5RHPiT2dV2A5ytAf8aNgZ` is `READY`, with health and built asset checks returning `200`. The remote build command is `npm run build` on Node `22.x`. Authenticated `/` and `/masuk` still return `500` because TiDB application schema, rotated credential, CA certificate, and DB environment variables are absent; private object storage is also required before feature verification or Production promotion.
 - The current lesson content is plain text with escaped rendering; rich-text editing and video hosting are intentionally outside the implemented scope. PDF certificate generation is implemented with on-demand Dompdf rendering; separate persistent PDF storage and QR/signature assets are not.
 - Certificate output has an owner-authorized, on-demand server-generated PDF plus the existing HTML/print presentation fallback. The PDF is not persisted as a public file.
 - Queue workers are not required by the current synchronous workflows; add one only if future notifications or heavy processing need it.

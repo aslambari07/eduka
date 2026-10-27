@@ -1,6 +1,38 @@
 # EDUKA deployment guide
 
-This application is prepared for a Laravel 13-compatible VPS or cPanel account. It has not been deployed to an external host from this workspace; follow the smoke checks below after deployment.
+This application is prepared for a Laravel 13-compatible VPS or cPanel account and now includes a Vercel serverless entrypoint. A protected Vercel Preview has been built successfully, but Production has not been promoted because the TiDB application schema, rotated credential, and durable object storage are not yet configured.
+
+## Vercel + TiDB Cloud architecture
+
+Vercel does not provide Laravel as a first-party runtime. The repository uses the community `vercel-php@0.7.4` runtime, which targets PHP 8.3, with `api/index.php` forwarding requests to Laravel’s `public/index.php`. The static Vite bundle is routed from `public/build`; all dynamic routes go through the PHP function. Vercel’s function filesystem is read-only except for temporary `/tmp`, so it is not a suitable permanent location for sessions, cache, logs, or assignment files.
+
+The Vercel project `eduka-learning-portal` was created in the authenticated account and connected to `https://github.com/aslambari07/eduka` on the `main` repository. The latest Preview deployment is `dpl_J1CS21m5RHPiT2dV2A5ytAf8aNgZ`, status `READY`, at `https://eduka-learning-portal-raq496ukn-aslambari07s-projects.vercel.app`. Preview deployment protection remains enabled.
+
+The first Preview build failed because Vercel inferred the Vite default output directory `dist`; setting `outputDirectory` to `public` fixed the build. A later runtime failure caused by stale development `bootstrap/cache` and missing production service discovery was fixed by retaining a verified production-only service manifest. The remote project now reports Node `22.x` and build command `npm run build`, matching `vercel.json` and `package.json`. `/up` and `/build/manifest.json` return `200`; authenticated requests to `/` and `/masuk` still return `500` because no TiDB connection variables are configured.
+
+The current Preview log audit shows that those failing requests reach Laravel's HTTP kernel and terminate in the application request path. This is consistent with the source: `/` executes database queries for published courses/categories, while database-backed sessions are enabled for `/masuk`. The Vercel environment list contains only the application key, URL, and debug setting; it contains no `DB_*` variables. The serverless config now pins `DB_CONNECTION=mysql` so it cannot silently fall back to a local SQLite file, but a verified TiDB host, non-system schema, rotated user/password, and TLS CA are still required before a new Preview deployment can pass.
+
+Required Vercel environment variables (values belong in Project Settings, never in `vercel.json` or Git):
+
+- `APP_KEY`, `APP_URL`, `APP_ENV=production`, `APP_DEBUG=false`.
+- `DB_CONNECTION=mysql`, verified TiDB application `DB_HOST`, `DB_PORT=4000`, `DB_DATABASE`, rotated `DB_USERNAME`, and rotated `DB_PASSWORD`.
+- `DB_SSL_CA` or `MYSQL_ATTR_SSL_CA` pointing to the verified TiDB CA file, with `MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=true`. Do not disable TLS verification.
+- `SESSION_DRIVER=database`, `CACHE_STORE=database`, and `QUEUE_CONNECTION=sync` unless a real external queue worker is provisioned.
+- `EDUKA_PRIVATE_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, and optional `AWS_ENDPOINT`/`AWS_URL` for a private S3-compatible bucket.
+- Production SMTP variables if password reset mail is required.
+
+The local MCP configuration currently points at the TiDB system schema `sys` and contains a database credential. That schema is not accepted as the EDUKA application database, and the credential must be rotated before any cloud connection or deployment. The MCP server is ignored by Git and was not used to migrate data in this audit.
+
+Deployment sequence after the target and credentials are supplied:
+
+1. Create or select the exact Vercel project and connect the intended repository/branch. **Completed for `eduka-learning-portal` / `main`.**
+2. Create or verify an empty, non-system TiDB application schema and restricted database user; take a backup if the schema is not empty.
+3. Add the production environment variables in Vercel Preview first. Do not add demo credentials or run `DemoCourseSeeder`.
+4. Deploy a Preview, inspect build/function logs, then run `php artisan migrate --force` against the verified schema only after confirming the migration list, backup, and explicit owner approval. **Build and runtime health are partially verified; DB-dependent requests are not.**
+5. Smoke-test HTTPS, assets, session login, all roles, enrollment, quiz, assignment submission/grading, certificate PDF, and private S3 download.
+6. Promote to Production only after Preview passes and the owner explicitly approves the promotion.
+
+The Preview URL and build/runtime logs are now real evidence of a successful Preview build, not Production readiness. Vercel history also contains an earlier failed Production deployment (`dpl_AV3M4g8EBTgByfcYj2DRumWARFYa`); no successful Production promotion is being claimed. A successful Production deployment, commit linkage, TiDB application connection, migration result, and full feature smoke test are still required before marking deployment successful.
 
 ## Hosting requirements
 
@@ -9,6 +41,7 @@ This application is prepared for a Laravel 13-compatible VPS or cPanel account. 
 - MySQL 8 or a compatible MariaDB version.
 - Composer 2.x and Node 20/npm for build-time setup, unless `vendor/` and `public/build/` are prepared locally and uploaded.
 - A web server whose document root can point to the project’s `public/` directory.
+- For Vercel, PHP 8.3 is provided by the pinned community runtime; Node 22.x is selected by `package.json` for the runtime build. The S3 Flysystem adapter is included for persistent private assignment storage.
 
 ## VPS deployment
 
@@ -18,7 +51,7 @@ This application is prepared for a Laravel 13-compatible VPS or cPanel account. 
 4. Copy `.env.example` to `.env` and set `APP_ENV=production`, `APP_DEBUG=false`, the HTTPS `APP_URL`, a generated `APP_KEY`, MySQL credentials, SMTP settings, and production session/cache values.
 5. Run `php artisan migrate --force`. Do not run `migrate:fresh` or `db:seed` against production.
 6. Run `php artisan storage:link` only if public assets need a symbolic link. Assignment files stay on the private local disk and must not be exposed through `public/storage`.
-7. Ensure `storage/` and `bootstrap/cache/` are writable by the web process, but keep `.env` outside the public document root.
+7. Ensure `storage/` and `bootstrap/cache/` are writable by the web process, but keep `.env` outside the public document root. On Vercel, do not rely on either directory for persistent writes; use database-backed session/cache and S3 for assignments.
 8. Run `php artisan config:cache`, `php artisan route:cache`, and `php artisan view:cache` after environment values are correct.
 9. Configure PHP-FPM/Apache/Nginx to serve `public/index.php`, force HTTPS, and use secure cookies. Set a process supervisor only if queue work is introduced later; the current core workflows do not require a worker.
 
@@ -40,7 +73,7 @@ Use file sessions/cache only when the host provides reliable writable storage. F
 
 ## Assignment upload limits
 
-The application keeps the upload limit in `config/eduka.php` and exposes it as `EDUKA_ASSIGNMENT_MAX_FILE_KB` (default `5120`). The participant form and instructor authoring form use this same limit. Submission validation checks the stored MIME/content type and the filename extension for the assignment’s allowed `pdf`, `zip`, or `docx` formats, then stores accepted files on Laravel’s private `local` disk with a generated storage name. Download authorization is unchanged.
+The application keeps the upload limit in `config/eduka.php` and exposes it as `EDUKA_ASSIGNMENT_MAX_FILE_KB` (default `5120`). The participant form and instructor authoring form use this same limit. Submission validation checks the stored MIME/content type and the filename extension for the assignment’s allowed `pdf`, `zip`, or `docx` formats, then stores accepted files on the configured private disk (`EDUKA_PRIVATE_DISK`) with a generated storage name. Local development defaults to `local`; Vercel production must use a private S3-compatible bucket. Download authorization is unchanged.
 
 The PHP limits must be larger than the application limit:
 

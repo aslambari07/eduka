@@ -105,7 +105,7 @@ class LearningController extends Controller
         $path = null;
         $fileName = null;
         if ($hasFileInput) {
-            $path = $request->file('file')->store('assignments', 'local');
+            $path = $request->file('file')->store('assignments', config('eduka.private_disk', 'local'));
             $fileName = $request->file('file')->getClientOriginalName();
         }
         $submission = DB::transaction(fn () => AssignmentSubmission::updateOrCreate(['assignment_id' => $assignment->id, 'user_id' => auth()->id()], ['body' => $data['body'] ?? null, 'file_path' => $path, 'file_name' => $fileName, 'status' => 'submitted', 'submitted_at' => now()]));
@@ -119,7 +119,7 @@ class LearningController extends Controller
         abort_unless($assignment->course_id === $course->id, 404);
         $submission = $assignment->submissions()->where('user_id', auth()->id())->firstOrFail();
         abort_unless($submission->file_path, 404);
-        return Storage::disk('local')->download($submission->file_path, $submission->file_name);
+        return Storage::disk(config('eduka.private_disk', 'local'))->download($submission->file_path, $submission->file_name);
     }
 
     public function note(Course $course, Note $note): View

@@ -97,7 +97,7 @@ Perbaikan Peserta: dashboard, profil, sertifikat index, dan catatan kini mengiku
 
 Hasil aktual final:
 
-- `php artisan test --compact` → **102 passed, 717 assertions**.
+- `php artisan test --compact` → **103 passed, 720 assertions**.
 - `php artisan migrate:status --no-ansi` → seluruh **20 migration Ran**.
 - `php artisan route:list --no-ansi` → **69 routes**, tanpa nama route duplikat.
 - `php artisan view:cache` → **passed**.

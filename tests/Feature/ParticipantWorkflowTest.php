@@ -115,6 +115,23 @@ class ParticipantWorkflowTest extends TestCase
         $this->actingAs($other)->get('/belajar/'.$course->slug.'/tugas/'.$assignment->id.'/file')->assertForbidden();
     }
 
+    public function test_assignment_submission_uses_the_configured_private_disk(): void
+    {
+        Storage::fake('s3');
+        config(['eduka.private_disk' => 's3']);
+        [$participant, $course, , , , , $assignment] = $this->courseFixture('assignment-s3-web');
+        Enrollment::create(['course_id' => $course->id, 'user_id' => $participant->id, 'status' => 'active', 'enrolled_at' => now()]);
+
+        $this->actingAs($participant)->post('/belajar/'.$course->slug.'/tugas/'.$assignment->id, [
+            'body' => 'Tugas pada object storage',
+            'file' => UploadedFile::fake()->create('project.pdf', 100, 'application/pdf'),
+        ])->assertRedirect();
+
+        $submission = AssignmentSubmission::where('assignment_id', $assignment->id)->where('user_id', $participant->id)->firstOrFail();
+        Storage::disk('s3')->assertExists($submission->file_path);
+        $this->actingAs($participant)->get('/belajar/'.$course->slug.'/tugas/'.$assignment->id.'/file')->assertOk();
+    }
+
     public function test_assignment_submission_shows_a_friendly_size_error_and_does_not_persist_an_oversized_file(): void
     {
         [$participant, $course, , , , , $assignment] = $this->courseFixture('assignment-size-validation-web');

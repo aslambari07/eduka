@@ -1,6 +1,10 @@
 <?php
 
 return [
+    // Keep assignment files on a private, persistent disk in production (for
+    // example S3). Local development intentionally defaults to local storage.
+    'private_disk' => env('EDUKA_PRIVATE_DISK', env('FILESYSTEM_DISK', 'local')),
+
     'assignment_upload' => [
         // Keep this below the PHP request limits configured for local and shared hosting.
         'max_file_kb' => min(max((int) env('EDUKA_ASSIGNMENT_MAX_FILE_KB', 5120), 1), 5120),

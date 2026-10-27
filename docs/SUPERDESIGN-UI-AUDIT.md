@@ -60,7 +60,7 @@ Browser smoke Chrome/CDP lokal tersedia untuk login/landing role dan screenshot 
 
 ## Verification
 
-- `php artisan test --compact` → **102 tests, 102 passed, 717 assertions** at the latest functional verification.
+- `php artisan test --compact` → **103 tests, 103 passed, 720 assertions** at the latest functional verification.
 - `php artisan view:cache` → **passed**.
 - `npm run build` → **passed**, Vite 7.3.7; generated manifest and assets are present in `public/build/`.
 - `php artisan route:list --no-ansi` → **69 routes**.

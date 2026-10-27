@@ -8,7 +8,7 @@ EDUKA is a Laravel 13 learning portal built from the approved Superdesign projec
 - Participant enrollment with prerequisites, protected lesson player, progress tracking, next/previous lesson navigation, server-scored quizzes with attempt limits, deadline-aware text/file assignments, private notes, certificates, owner-authorized server-side PDF download, HTML fallback, verification, and print output.
 - Instructor dashboard, owned course drafts, material/quiz/question/assignment authoring, quiz builder, submission inbox, grading, and feedback.
 - Admin dashboard, user role/status management, category CRUD, course publication moderation, enrollment progress reports, and pagination.
-- Private assignment files are stored on Laravel’s non-public `local` disk and downloaded only by the submitting participant.
+- Private assignment files use a configurable private disk: Laravel’s non-public `local` disk in development and an S3-compatible private bucket in serverless production. Downloads remain owner-authorized.
 
 Design artifacts and screen mapping live in [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md), [`docs/PROJECT-STATUS.md`](docs/PROJECT-STATUS.md), and [`.superdesign/implementation-map.md`](.superdesign/implementation-map.md).
 
@@ -17,7 +17,7 @@ Design artifacts and screen mapping live in [`docs/DESIGN-SYSTEM.md`](docs/DESIG
 - PHP 8.3+
 - Composer 2.x
 - MySQL 8/MariaDB compatible with Laravel 13
-- Node.js 20+ and npm
+- Node.js 20+ and npm locally; the Vercel build is pinned to Node 22.x
 - PHP extensions used by Laravel plus `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `ctype`, `json`, and `tokenizer`
 - PDF generation also requires the PHP `dom` extension; Dompdf uses bundled DejaVu fonts and does not require Chrome, wkhtmltopdf, or Node.js at request time.
 - Assignment uploads are limited to 5120 KB (5 MiB) by the application. The PHP process serving the app must use at least `upload_max_filesize=8M` and `post_max_size=10M`.
@@ -71,11 +71,18 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://your-domain.example
 DB_CONNECTION=mysql
-SESSION_DRIVER=file
-CACHE_STORE=file
+DB_PORT=4000                       # TiDB Cloud MySQL protocol port
+SESSION_DRIVER=database            # persists across serverless invocations
+CACHE_STORE=database               # persists across serverless invocations
+QUEUE_CONNECTION=sync              # no worker is assumed on Vercel
 MAIL_MAILER=smtp
-FILESYSTEM_DISK=local
+EDUKA_PRIVATE_DISK=s3              # required for persistent private assignment files
 ```
+
+For Vercel/TiDB Cloud, set the values through Project Settings without copying
+passwords into `vercel.json` or Git. The database must use the verified TiDB
+application schema, never the `sys` schema. TLS must remain enabled with a
+verified TiDB CA certificate; see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 Never commit `.env`, production credentials, `APP_KEY`, SMTP passwords, or cloud storage keys. Configure SMTP values through the hosting environment. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for cPanel/VPS procedures.
 
